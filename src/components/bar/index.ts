@@ -1,31 +1,37 @@
 import Component from '../../component';
 import { create } from '../../core/virtual-dom';
 
-export default class Bar extends Component {
+
+type data = {
+	progress: number
+}
+export default class Bar extends Component<data> {
 	data() {
 		return {
-			greeten: 'Hello World',
-			count: 1,
+			progress: 0,
 		}
 	}
 
 	mounted(): void {
-		setTimeout(() => {
-			this._data.count = 2
-			this.rerender()
+		const timer = setInterval(() => {
+			this._data.progress++
+			if (this._data.progress >= 100) {
+				clearInterval(timer)
+			}
 		}, 1000)
 	}
 
-	updated(): void {
-		setTimeout(() => {
-			this._data.count++
-			this.rerender()
-		}, 2000)
+	style() {
+		return {
+			width: `${this._data.progress}%`,
+			background: 'red',
+		}
 	}
 
 	render(h: typeof create) {
 		return h('div', {
 			class: 'bar',
-		}, this._data.count)
+			style: this.style(),
+		}, this._data.progress)
 	}
 }

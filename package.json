@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "lint": "eslint --fix --ext .js,.ts .",
-    "serve": "npx parcel index.htm"
+    "serve": "npx parcel ./index.html"
   },
   "author": "",
   "license": "ISC",
