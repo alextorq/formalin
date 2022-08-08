@@ -3,10 +3,11 @@ export type VNode = {
 	attributes: Record<string, unknown>
     children?: Array<VNode> | string | number
 	listners?: Record<string, () => unknown>
+	el?: Element
 }
 
 
-export function create(type: string, attributes: Record<string, unknown> = {}, children?: VNode['children'], listners: Record<string, () => unknown> = {}): VNode {
+export function create(type: string, attributes: VNode['attributes'] = {}, children?: VNode['children'], listners: VNode['listners'] = {}): VNode {
     return {
         type,
 		attributes,

@@ -1,14 +1,14 @@
 import { reactive } from './reactive'
-import { renderHTML } from './render'
+import { patch, renderHTML, unmound } from './render'
 import { create, VNode } from './virtual-dom'
-
-
 
 
 
 export class Formalin<T extends object = Record<string, any>>  {
 	root: Element|null = null
 	protected _data: T = {} as T
+
+	private _oldVal: VNode|null = null
 
 	constructor() {
 		currentComponent.current = this
@@ -28,10 +28,14 @@ export class Formalin<T extends object = Record<string, any>>  {
 	mount(selector: string) {
 		this.root = document.querySelector(selector)
 		if (!this.root) return new Error('element not found')
-		const vDom = this.render(create)
-		this.root.appendChild(renderHTML(vDom))
+		this._oldVal = this.render(create)
+		this.root.appendChild(renderHTML(this._oldVal))
 		this.mounted()
 		return this
+	}
+
+	unmount() {
+		unmound(this._oldVal!)
 	}
 
     render(h: typeof create): VNode {
@@ -39,18 +43,20 @@ export class Formalin<T extends object = Record<string, any>>  {
     }
 
     mounted() {
-        console.log('mounted');
+        // console.log('mounted');
     }
 
 	updated() {
-		console.log('updated');
+		// console.log('updated');
 	}
 
 
 	rerender() {
 		if (!this.root) throw new Error('element not found')
-		const vDom = this.render(create)
-		this.root.replaceChildren(renderHTML(vDom))
+		const tree = this.render(create)
+		const patchFun = patch(this._oldVal!, tree)
+		this._oldVal?.el?.replaceWith(patchFun())
+		this._oldVal = tree
 		this.updated()
 	}
 }

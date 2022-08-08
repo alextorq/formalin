@@ -4,14 +4,14 @@ import { create } from '../../core/virtual-dom';
 export default class Input extends Component<{value: string}> {
 	data() {
 		return {
-			value: ''
+			value: '12333'
 		}
 	}
 
 	mounted(): void {
-		// setInterval(() => {
-		// 	this._data.value += 'a' 
-		// }, 1000)
+		setInterval(() => {
+			// this._data.value += 'a' 
+		}, 1000)
 	}
 
 
@@ -20,10 +20,11 @@ export default class Input extends Component<{value: string}> {
 			class: 'bar',
 			value: this._data.value
 		}, undefined, {
-			onclick: () => this.click()
+			oninput: (e) => this.onInput(e)
 		})
 	}
-	click(): unknown {
-		console.log('click');
+
+	onInput(e) {
+		this._data.value = e.target.value
 	}
 }
