@@ -3,7 +3,6 @@ import { patch, renderHTML, unmound } from './render'
 import { create, VNode } from './virtual-dom'
 
 
-
 export class Formalin<T extends object = Record<string, any>>  {
 	root: Element|null = null
 	protected _data: T = {} as T

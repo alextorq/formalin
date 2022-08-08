@@ -4,7 +4,7 @@ import { create } from '../../core/virtual-dom';
 export default class Input extends Component<{value: string}> {
 	data() {
 		return {
-			value: '12333'
+			value: ''
 		}
 	}
 
@@ -16,12 +16,14 @@ export default class Input extends Component<{value: string}> {
 
 
 	render(h: typeof create) {
-		return h('input', {
+		const input = h('input', {
 			class: 'bar',
 			value: this._data.value
 		}, undefined, {
-			oninput: (e) => this.onInput(e)
+			onInput: (e) => this.onInput(e)
 		})
+
+		return h('div', {}, [input])
 	}
 
 	onInput(e) {
