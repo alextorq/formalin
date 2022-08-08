@@ -2,5 +2,5 @@ import Bar from './components/bar'
 import Input from './components/input/input'
 
 document.addEventListener('DOMContentLoaded', () => {
-	new Input().mount('#app')
+	new Input().create('#app')
 })

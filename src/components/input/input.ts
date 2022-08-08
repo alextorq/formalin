@@ -23,7 +23,12 @@ export default class Input extends Component<{value: string}> {
 			onInput: (e) => this.onInput(e)
 		})
 
-		return h('div', {}, [input])
+
+		const bar = h('Bar', {
+			class: 'bar',
+		})
+
+		return h('div', {}, [input, bar])
 	}
 
 	onInput(e) {

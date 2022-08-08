@@ -2,16 +2,28 @@ import { capitalizeFirstLetter } from '../../utils';
 import { VNode } from '../virtual-dom';
 import {Components} from '../../component/index'
 
+
+
+function setAttribute(el: Element, attr: VNode['attributes']) {
+	Object.entries(attr).forEach(([key, value]) => {
+		if(key === 'style') {
+			Object.assign(el.style, value);
+		} else {
+			el.setAttribute(key, value)
+		}
+	})
+}
+
 export function renderHTML(node: VNode): HTMLElement {
-	const element = document.createElement(node.type)
+	let element = document.createElement(node.type)
 	if (Components[node.type]) {
 		const component = Components[node.type]
 		console.log(component);
-		new component()
+		element = new component().create(element).root
 	}
 	
 
-	node.el = element
+	
 	const type = typeof node.children
 	if (type === 'string' ||  type === 'number' && node.children) {
 		element.innerText = node.children?.toString()
@@ -21,20 +33,14 @@ export function renderHTML(node: VNode): HTMLElement {
 		})
 	}
 
-	Object.entries(node.attributes).forEach(([key, value]) => {
-		if(key === 'style') {
-			Object.assign(element.style, value);
-		} else {
-			element.setAttribute(key, value)
-		}
-	})
-
 
 	Object.entries(node.listners || {}).forEach(([key, value]) => {
 		const name = capitalizeFirstLetter(key.replace('on', ''))
 		element.addEventListener(name, value)
 	})
 
+	setAttribute(element, node.attributes)
+	node.el = element
 	return element
 }
 

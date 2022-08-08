@@ -24,8 +24,8 @@ export class Formalin<T extends object = Record<string, any>>  {
 		return {} as T
 	}
 
-	mount(selector: string) {
-		this.root = document.querySelector(selector)
+	create(selector: string|Element) {
+		this.root = typeof selector === 'string' ? document.querySelector(selector) : selector
 		if (!this.root) return new Error('element not found')
 		this._oldVal = this.render(create)
 		this.root.appendChild(renderHTML(this._oldVal))
