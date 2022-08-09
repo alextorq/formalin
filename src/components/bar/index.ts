@@ -1,7 +1,6 @@
 import Component from '../../component';
 import { create } from '../../core/virtual-dom';
 
-
 type data = {
 	progress: number
 }
@@ -25,6 +24,7 @@ export default class Bar extends Component<data> {
 		return {
 			width: `${this._data.progress}%`,
 			background: 'red',
+			height: '20px'
 		}
 	}
 

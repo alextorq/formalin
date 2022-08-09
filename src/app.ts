@@ -1,6 +1,6 @@
-import Bar from './components/bar'
 import Input from './components/input/input'
+import {mount} from './core/render/mount';
 
 document.addEventListener('DOMContentLoaded', () => {
-	new Input().create('#app')
+	mount(new Input(), '#app')
 })

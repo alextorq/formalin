@@ -1,5 +1,6 @@
 import Component from '../../component';
 import { create } from '../../core/virtual-dom';
+import Bar from '../bar';
 
 export default class Input extends Component<{value: string}> {
 	data() {
@@ -9,20 +10,23 @@ export default class Input extends Component<{value: string}> {
 	}
 
 	mounted(): void {
-		setInterval(() => {
-			// this._data.value += 'a' 
-		}, 1000)
+		// setInterval(() => {
+		// 	this._data.value += 'a'
+		// }, 1000)
 	}
 
+	components() {
+		return {
+			'Bar': Bar,
+		}
+	}
 
 	render(h: typeof create) {
 		const input = h('input', {
-			class: 'bar',
 			value: this._data.value
 		}, undefined, {
-			onInput: (e) => this.onInput(e)
+			onInput: (e: any) => this.onInput(e)
 		})
-
 
 		const bar = h('Bar', {
 			class: 'bar',
@@ -31,7 +35,7 @@ export default class Input extends Component<{value: string}> {
 		return h('div', {}, [input, bar])
 	}
 
-	onInput(e) {
+	onInput(e: Event) {
 		this._data.value = e.target.value
 	}
 }

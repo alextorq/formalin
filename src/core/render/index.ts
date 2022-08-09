@@ -3,43 +3,42 @@ import { VNode } from '../virtual-dom';
 import {Components} from '../../component/index'
 
 
-
-function setAttribute(el: Element, attr: VNode['attributes']) {
+function setAttribute(el: Element, attr: VNode['attributes'], oldAttr: VNode['attributes']) {
 	Object.entries(attr).forEach(([key, value]) => {
 		if(key === 'style') {
 			Object.assign(el.style, value);
 		} else {
-			el.setAttribute(key, value)
+			if (oldAttr[key] !== attr[key]) {
+				el.setAttribute(key, value)
+			}
 		}
 	})
 }
 
-export function renderHTML(node: VNode): HTMLElement {
-	let element = document.createElement(node.type)
+export function renderHTML(node: VNode, oldNode?: VNode): HTMLElement {
+	let element = oldNode?.el || document.createElement(node.type)
 	if (Components[node.type]) {
 		const component = Components[node.type]
-		console.log(component);
-		element = new component().create(element).root
+		const com = new component()
+		element = com.create()
+		com.mounted()
 	}
-	
-
-	
 	const type = typeof node.children
 	if (type === 'string' ||  type === 'number' && node.children) {
 		element.innerText = node.children?.toString()
-	}else if (Array.isArray(node.children)) {
-		node.children.forEach((i) => {
-			element.appendChild(renderHTML(i))
+	} else if (Array.isArray(node.children)) {
+		node.children.forEach((i, index) => {
+			const el = renderHTML(i, oldNode?.children[index])
+			element.appendChild(el)
 		})
 	}
-
 
 	Object.entries(node.listners || {}).forEach(([key, value]) => {
 		const name = capitalizeFirstLetter(key.replace('on', ''))
 		element.addEventListener(name, value)
 	})
 
-	setAttribute(element, node.attributes)
+	setAttribute(element, node.attributes, oldNode?.['attributes'] ?? {})
 	node.el = element
 	return element
 }
@@ -56,15 +55,22 @@ export function unmound(tree: VNode) {
 	}
 }
 
-
-
-export function patch(oldTree: VNode, newTree: VNode) {
+export function patch(oldTree: VNode, newTree: VNode): Array<() => Element|void> {
+	const render = []
 	if (oldTree.type !== newTree.type) {
-		return () => {
+		return [() => {
 			unmound(oldTree)
-			return renderHTML(newTree)
-		}
+			return renderHTML(newTree, oldTree)
+		}]
 	}
-
-	return () => renderHTML(newTree)
+	const element = oldTree.el
+	newTree.el = element
+	if (Array.isArray(newTree.children)) {
+		newTree.children.forEach((item, index) => {
+			const prev = oldTree.children[index]
+			render.push(...patch(prev, item))
+		})
+	}
+	render.push(() => setAttribute(element, newTree['attributes'], oldTree['attributes']))
+	return render
 }

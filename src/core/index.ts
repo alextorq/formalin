@@ -4,7 +4,7 @@ import { create, VNode } from './virtual-dom'
 
 
 export class Formalin<T extends object = Record<string, any>>  {
-	root: Element|null = null
+	root: HTMLElement|null = null
 	protected _data: T = {} as T
 
 	private _oldVal: VNode|null = null
@@ -24,13 +24,10 @@ export class Formalin<T extends object = Record<string, any>>  {
 		return {} as T
 	}
 
-	create(selector: string|Element) {
-		this.root = typeof selector === 'string' ? document.querySelector(selector) : selector
-		if (!this.root) return new Error('element not found')
+	create() {
 		this._oldVal = this.render(create)
-		this.root.appendChild(renderHTML(this._oldVal))
-		this.mounted()
-		return this
+		this.root = renderHTML(this._oldVal)
+		return this.root
 	}
 
 	unmount() {
@@ -53,8 +50,11 @@ export class Formalin<T extends object = Record<string, any>>  {
 	rerender() {
 		if (!this.root) throw new Error('element not found')
 		const tree = this.render(create)
-		const patchFun = patch(this._oldVal!, tree)
-		this._oldVal?.el?.replaceWith(patchFun())
+		const old = this._oldVal
+		const patchFun = patch(old!, tree)
+		patchFun.forEach((render) => {
+			render()
+		})
 		this._oldVal = tree
 		this.updated()
 	}
