@@ -13,7 +13,7 @@ export default class Bar extends Component<data> {
 
 	mounted(): void {
 		const timer = setInterval(() => {
-			this._data.progress++
+			// this._data.progress++
 			if (this._data.progress >= 100) {
 				clearInterval(timer)
 			}
@@ -24,7 +24,8 @@ export default class Bar extends Component<data> {
 		return {
 			width: `${this._data.progress}%`,
 			background: 'red',
-			height: '20px'
+			height: '20px',
+			transition: 'all 1.4s'
 		}
 	}
 

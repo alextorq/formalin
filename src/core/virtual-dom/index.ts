@@ -1,20 +1,31 @@
 export type VNode = {
     type: string
 	attributes: Record<string, unknown>
-    children?: Array<VNode> | string | number
+    children: Array<VNode>
 	listners?: Record<string, (e: Event) => unknown>
 	el?: HTMLElement
+	val?: string | number
 }
 
-export function create(type: string, attributes: VNode['attributes'] = {}, children?: VNode['children'], listners: VNode['listners'] = {}): VNode {
+type children = Array<VNode> | string | number
+
+export const TEXT = 'text'
+
+export function create(type: string, attributes: VNode['attributes'] = {}, children: children, listners: VNode['listners'] = {}): VNode {
+	const isNs = typeof children !== 'object'
+
+	const childrenFinal = isNs ? [{
+		...create(TEXT, {}, []),
+		val: children
+	}] : children
+
     return {
         type,
 		attributes,
-        children,
+		children: childrenFinal,
 		listners
     }
 }
-
 
 
 export function getDiff(oldTrhee: VNode, newTrhee: VNode) {

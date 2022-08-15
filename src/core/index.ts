@@ -24,7 +24,7 @@ export class Formalin<T extends object = Record<string, any>>  {
 		return {} as T
 	}
 
-	create() {
+	public create() {
 		this._oldVal = this.render(create)
 		this.root = renderHTML(this._oldVal)
 		return this.root

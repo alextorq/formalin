@@ -24,13 +24,13 @@ export default class Input extends Component<{value: string}> {
 	render(h: typeof create) {
 		const input = h('input', {
 			value: this._data.value
-		}, undefined, {
+		}, [], {
 			onInput: (e: any) => this.onInput(e)
 		})
 
 		const bar = h('Bar', {
 			class: 'bar',
-		})
+		}, [])
 
 		return h('div', {}, [input, bar])
 	}

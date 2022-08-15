@@ -1,9 +1,22 @@
 import { Formalin } from '../core';
+import {VNode} from '../core/virtual-dom';
+type componentConstructor =  new () => Component<any>
+
+class Register {
+	store: Record<string, componentConstructor> = {}
 
 
-export const Components: Record<string, new () => Component<any>> = {
+	addComponent(key: string, component: componentConstructor) {
+		this.store[key] = component
+	}
 
+	getByKey(key: string) {
+		return this.store[key]
+	}
 }
+
+export const reg = new Register()
+
 
 export default class Component<T extends object>  extends Formalin<T> {
 	constructor() {
@@ -13,11 +26,16 @@ export default class Component<T extends object>  extends Formalin<T> {
 
 	registerComponents() {
 		Object.entries(this.components()).forEach(([key, value]) => {
-			Components[key] = value
+			reg.addComponent(key, value)
 		})
 	}
 
-	components(): Record<string, new () => Component<any>>   {
+	components(): Record<string, componentConstructor>   {
 		return {}
 	}
+}
+
+
+export function isComponent(node: VNode) {
+	return !!reg.getByKey(node.type)
 }
