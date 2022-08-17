@@ -3,9 +3,10 @@ import { patch, renderHTML, unmound } from './render'
 import { create, VNode } from './virtual-dom'
 
 
-export class Formalin<T extends object = Record<string, any>>  {
+export class Formalin<Data extends object = Record<string, any>, Props extends object = Record<string, any>>  {
 	root: HTMLElement|null = null
-	protected _data: T = {} as T
+	protected _data: Data = {} as Data
+	public props: Props = {} as Props
 
 	private _oldVal: VNode|null = null
 
@@ -20,8 +21,8 @@ export class Formalin<T extends object = Record<string, any>>  {
 		currentComponent.current = null
 	}
 
-	data(): T  {
-		return {} as T
+	data(): Data  {
+		return {} as Data
 	}
 
 	public create() {

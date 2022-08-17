@@ -13,7 +13,7 @@ export default class Bar extends Component<data> {
 
 	mounted(): void {
 		const timer = setInterval(() => {
-			// this._data.progress++
+			this._data.progress++
 			if (this._data.progress >= 100) {
 				clearInterval(timer)
 			}

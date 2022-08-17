@@ -24,18 +24,30 @@ export default class Component<T extends object>  extends Formalin<T> {
 		this.registerComponents()
 	}
 
-	registerComponents() {
+	// props: {
+	// 	title: String,
+	// 	likes: Number
+	// }
+
+	private registerComponents() {
 		Object.entries(this.components()).forEach(([key, value]) => {
 			reg.addComponent(key, value)
 		})
 	}
 
-	components(): Record<string, componentConstructor>   {
+	public components(): Record<string, componentConstructor>   {
 		return {}
 	}
 }
 
 
-export function isComponent(node: VNode) {
+export function isComponent(node: VNode, el: VNode['el']): el is Component<never> {
 	return !!reg.getByKey(node.type)
+}
+
+
+
+export function getDomElement(node: VNode): HTMLElement {
+	const el = node.el
+	return  isComponent(node, el) ? el.root as HTMLElement : el as HTMLElement
 }

@@ -1,9 +1,9 @@
 import { capitalizeFirstLetter } from '../../utils';
 import {TEXT, VNode} from '../virtual-dom';
-import {isComponent, reg} from '../../component/index'
+import Component, {getDomElement, isComponent, reg} from '../../component/index'
 
 
-function setAttribute(el: Element, attr: VNode['attributes'], oldAttr: VNode['attributes']) {
+function setAttribute(el: HTMLElement, attr: VNode['attributes'], oldAttr: VNode['attributes']) {
 	Object.entries(attr).forEach(([key, value]) => {
 		if(key === 'style') {
 			Object.assign(el.style, value);
@@ -32,30 +32,31 @@ function createElement(node: VNode, oldNode?: VNode) {
 }
 
 export function renderHTML(node: VNode, oldNode?: VNode): HTMLElement {
-	let element = createElement(node, oldNode)
-	if (isComponent(node)) {
+	let element: Component<any>| ReturnType<typeof createElement> = createElement(node, oldNode)
+	let domElement: HTMLElement = element as HTMLElement
+	if (isComponent(node, node.el)) {
 		const component = reg.getByKey(node.type)
-		const com = new component()
-		element = com.create()
-		com.mounted()
+		element = new component()
+		domElement = element.create()
+		element.mounted()
 	}
 
 	if (node.children) {
 		node.children.forEach((i, index) => {
 			const el = renderHTML(i, oldNode?.children[index])
-			element.appendChild(el)
+			domElement.appendChild(el)
 		})
 	}
 
-	addEventListener(element, node)
-	setAttribute(element, node.attributes, oldNode?.['attributes'] ?? {})
+	addEventListener(domElement, node)
+	setAttribute(domElement, node.attributes, oldNode?.['attributes'] ?? {})
 
 	node.el = element
-	return element
+	return domElement
 }
 
 export function unmound(tree: VNode) {
-	const element = tree.el
+	const element = isComponent(tree, tree.el) ? tree.el.root : tree.el
 	const listeners = tree.listners || {}
 	if (element) {
 		Object.keys(listeners).map((key) => {
@@ -69,8 +70,8 @@ export function unmound(tree: VNode) {
 export function patch(oldTree: VNode, newTree: VNode, parent?: VNode): Array<() => Element|void> {
 	const render = []
 	const isText = newTree.val !== oldTree.val
-	const element = oldTree.el
-	newTree.el = element
+	const domElement = getDomElement(oldTree)
+	newTree.el = oldTree.el
 	if (oldTree.type !== newTree.type || isText) {
 		return [() => {
 			unmound(oldTree)
@@ -84,6 +85,6 @@ export function patch(oldTree: VNode, newTree: VNode, parent?: VNode): Array<() 
 		})
 	}
 
-	render.push(() => setAttribute(element, newTree['attributes'], oldTree['attributes']))
+	render.push(() => setAttribute(domElement, newTree['attributes'], oldTree['attributes']))
 	return render
 }

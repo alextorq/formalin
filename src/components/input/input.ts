@@ -35,7 +35,7 @@ export default class Input extends Component<{value: string}> {
 		return h('div', {}, [input, bar])
 	}
 
-	onInput(e: Event) {
-		this._data.value = e.target.value
+	onInput(e: InputEvent) {
+		this._data.value = e?.target?.value
 	}
 }
