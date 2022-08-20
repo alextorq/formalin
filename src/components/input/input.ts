@@ -2,10 +2,10 @@ import Component from '../../component';
 import { create } from '../../core/virtual-dom';
 import Bar from '../bar';
 
-export default class Input extends Component<{value: string}> {
+export default class Input extends Component<{value: number}> {
 	data() {
 		return {
-			value: ''
+			value: 0
 		}
 	}
 
@@ -30,12 +30,13 @@ export default class Input extends Component<{value: string}> {
 
 		const bar = h('Bar', {
 			class: 'bar',
+			progress: +this._data.value
 		}, [])
 
 		return h('div', {}, [input, bar])
 	}
 
 	onInput(e: InputEvent) {
-		this._data.value = e?.target?.value
+		this._data.value = +e?.target?.value
 	}
 }

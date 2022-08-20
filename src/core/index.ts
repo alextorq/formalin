@@ -4,9 +4,10 @@ import { create, VNode } from './virtual-dom'
 
 
 export class Formalin<Data extends object = Record<string, any>, Props extends object = Record<string, any>>  {
-	root: HTMLElement|null = null
+	public root: HTMLElement|null = null
 	protected _data: Data = {} as Data
 	public props: Props = {} as Props
+	public propsSpec: Partial<Record<keyof Props, any>> = {}
 
 	private _oldVal: VNode|null = null
 
@@ -43,12 +44,16 @@ export class Formalin<Data extends object = Record<string, any>, Props extends o
         // console.log('mounted');
     }
 
-	updated() {
+	protected updated() {
 		// console.log('updated');
 	}
 
+	public setProps(newProps: Props) {
+		this.props = newProps
+		this.updated()
+	}
 
-	rerender() {
+	protected rerender() {
 		if (!this.root) throw new Error('element not found')
 		const tree = this.render(create)
 		const old = this._oldVal

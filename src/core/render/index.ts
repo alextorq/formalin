@@ -5,10 +5,11 @@ import Component, {getDomElement, isComponent, reg} from '../../component/index'
 
 function setAttribute(el: HTMLElement, attr: VNode['attributes'], oldAttr: VNode['attributes']) {
 	Object.entries(attr).forEach(([key, value]) => {
-		if(key === 'style') {
-			Object.assign(el.style, value);
-		} else {
-			if (oldAttr[key] !== attr[key]) {
+		if (oldAttr[key] !== attr[key]) {
+			if(key === 'style') {
+				Object.assign(el.style, value);
+			}
+			else {
 				el.setAttribute(key, value)
 			}
 		}
@@ -23,6 +24,29 @@ function addEventListener(element: HTMLElement, node: VNode) {
 	})
 }
 
+function getPropsSpec(component: Component<any>) {
+	const propsSpec = {}
+	if (component.propsSpec) {
+		Object.assign(propsSpec, component.propsSpec)
+	}
+	return propsSpec
+}
+
+function getPropsVal(node: VNode, component: Component<any>) {
+	const propsDefault = getPropsSpec(component)
+	const accum: Record<string, any> = {}
+	Object.keys(propsDefault).map((currentValue) => {
+		if (node.attributes[currentValue] !== undefined) {
+			accum[currentValue] = node.attributes[currentValue] || propsDefault[currentValue]
+		}
+	})
+	return accum
+}
+
+function setProps(node: VNode, component: Component<any>) {
+	const props = getPropsVal(node, component)
+	component.setProps(props)
+}
 
 function createElement(node: VNode, oldNode?: VNode) {
 	if (node.type === TEXT) {
@@ -37,6 +61,7 @@ export function renderHTML(node: VNode, oldNode?: VNode): HTMLElement {
 	if (isComponent(node, node.el)) {
 		const component = reg.getByKey(node.type)
 		element = new component()
+		setProps(node, element)
 		domElement = element.create()
 		element.mounted()
 	}
@@ -78,13 +103,18 @@ export function patch(oldTree: VNode, newTree: VNode, parent?: VNode): Array<() 
 			parent?.el?.appendChild(renderHTML(newTree, oldTree))
 		}]
 	}
-	if (Array.isArray(newTree.children)) {
-		newTree.children.forEach((item, index) => {
-			const prev = oldTree.children[index]
-			render.push(...patch(prev, item, newTree))
-		})
-	}
 
 	render.push(() => setAttribute(domElement, newTree['attributes'], oldTree['attributes']))
+
+	newTree.children.forEach((item, index) => {
+		const prev = oldTree.children[index]
+		if (isComponent(prev && prev, prev && prev.el)) {
+			setProps(item, prev.el)
+			render.push(() => prev.el.rerender())
+		}else {
+			render.push(...patch(prev, item, newTree))
+		}
+	})
+
 	return render
 }
