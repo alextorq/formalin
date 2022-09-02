@@ -28,8 +28,12 @@ export class Formalin<Data extends object = Record<string, any>, Props extends o
 
 	public create() {
 		this._oldVal = this.render(create)
-		this.root = renderHTML(this._oldVal)
-		return this.root
+		return this._oldVal
+	}
+
+	mount() {
+		this.root = renderHTML(this._oldVal!)
+		return this.root!
 	}
 
 	unmount() {
@@ -57,6 +61,7 @@ export class Formalin<Data extends object = Record<string, any>, Props extends o
 		if (!this.root) throw new Error('element not found')
 		const tree = this.render(create)
 		const old = this._oldVal
+		tree.el = this
 		const patchFun = patch(old!, tree)
 		patchFun.forEach((render) => {
 			render()

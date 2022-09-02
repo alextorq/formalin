@@ -1,11 +1,14 @@
-import Component from '../../component';
+import Component, { isComponent, reg } from '../../component';
+import { setProps } from '../render';
 
 export type VNode = {
     type: string
+	tag: string
+	component: null|Component<any, any>
 	attributes: Record<string, unknown>
     children: Array<VNode>
 	listners?: Record<string, (e: Event) => unknown>
-	el?: HTMLElement|Component<any>|Text
+	el?: HTMLElement|Text
 	val?: string | number
 }
 
@@ -21,12 +24,29 @@ export function create(type: string, attributes: VNode['attributes'] = {}, child
 		val: children
 	}] : children
 
-    return {
-        type,
+	const node: VNode = {
+		type,
+		tag: type,
+		component: null,
 		attributes,
 		children: childrenFinal,
 		listners
-    }
+	}
+
+	if (isComponent(node)) {
+		const componentConstructor = reg.getByKey(node.type)
+		const component = new componentConstructor()
+		setProps(node, component)
+		
+		const vNode = component.create()
+
+		node.tag = vNode.tag
+		node.children = vNode.children
+		node.component = component
+	}
+
+
+    return node
 }
 
 

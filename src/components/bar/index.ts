@@ -9,7 +9,6 @@ type data = {
 	progress: number
 }
 export default class Bar extends Component<data, props> {
-
 	propsSpec = {
 		progress: 0
 	}
@@ -23,7 +22,7 @@ export default class Bar extends Component<data, props> {
 	mounted(): void {
 		const timer = setInterval(() => {
 			// this._data.progress++
-			if (this._data.progress >= 100) {
+			if (this.props.progress >= 100) {
 				clearInterval(timer)
 			}
 		}, 1000)

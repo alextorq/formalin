@@ -33,7 +33,9 @@ export default class Input extends Component<{value: number}> {
 			progress: +this._data.value
 		}, [])
 
-		return h('div', {}, [input, bar])
+		const res = h('div', {}, [input, bar])
+		
+		return res
 	}
 
 	onInput(e: InputEvent) {

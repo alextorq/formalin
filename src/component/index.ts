@@ -36,13 +36,12 @@ export default class Component<T extends object, P extends object = {}>  extends
 }
 
 
-export function isComponent(node?: VNode, el?: VNode['el']): el is Component<never> {
+export function isComponent(node?: VNode): el is Component<never> {
 	return !!node && !!reg.getByKey(node.type)
 }
 
 
-
-export function getDomElement(node: VNode): HTMLElement {
+export function getDomElement(node: VNode): VNode['el'] {
 	const el = node.el
-	return  isComponent(node, el) ? el.root as HTMLElement : el as HTMLElement
+	return el
 }

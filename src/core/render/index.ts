@@ -4,6 +4,10 @@ import Component, {getDomElement, isComponent, reg} from '../../component/index'
 
 
 function setAttribute(el: HTMLElement, attr: VNode['attributes'], oldAttr: VNode['attributes']) {
+
+	console.log({attr, oldAttr});
+	
+
 	Object.entries(attr).forEach(([key, value]) => {
 		if (oldAttr[key] !== attr[key]) {
 			if(key === 'style') {
@@ -43,40 +47,35 @@ function getPropsVal(node: VNode, component: Component<any>) {
 	return accum
 }
 
-function setProps(node: VNode, component: Component<any>) {
+export function setProps(node: VNode, component: Component<any>) {
 	const props = getPropsVal(node, component)
 	component.setProps(props)
 }
 
-function createElement(node: VNode, oldNode?: VNode) {
+function createElement(node: VNode, oldNode?: VNode): NonNullable<VNode['el']> {
 	if (node.type === TEXT) {
 		return document.createTextNode(node.val as string)
 	}
-	return oldNode?.el || document.createElement(node.type)
+	return oldNode?.el || document.createElement(node.tag)
 }
 
-export function renderHTML(node: VNode, oldNode?: VNode): HTMLElement {
-	let element: Component<any>| ReturnType<typeof createElement> = createElement(node, oldNode)
-	let domElement: HTMLElement = element as HTMLElement
-	if (isComponent(node, node.el)) {
-		const component = reg.getByKey(node.type)
-		element = new component()
-		setProps(node, element)
-		domElement = element.create()
-		element.mounted()
+export function renderHTML(node: VNode, oldNode?: VNode): NonNullable<VNode['el']> {
+	let domElement = createElement(node, oldNode)
+
+	if (node.component) {
+		domElement = node.component.mount()
+		node.component.mounted()
 	}
 
-	if (node.children) {
-		node.children.forEach((i, index) => {
-			const el = renderHTML(i, oldNode?.children[index])
-			domElement.appendChild(el)
-		})
-	}
+	node.children.forEach((i, index) => {
+		const el = renderHTML(i, oldNode?.children[index])
+		domElement.appendChild(el)
+	})
 
 	addEventListener(domElement, node)
 	setAttribute(domElement, node.attributes, oldNode?.['attributes'] ?? {})
 
-	node.el = element
+	node.el = domElement
 	return domElement
 }
 
@@ -97,6 +96,7 @@ export function patch(oldTree: VNode, newTree: VNode, parent?: VNode): Array<() 
 	const isText = newTree.val !== oldTree.val
 	const domElement = getDomElement(oldTree)
 	newTree.el = oldTree.el
+
 	if (oldTree.type !== newTree.type || isText) {
 		return [() => {
 			unmound(oldTree)
@@ -108,10 +108,10 @@ export function patch(oldTree: VNode, newTree: VNode, parent?: VNode): Array<() 
 
 	newTree.children.forEach((item, index) => {
 		const prev = oldTree.children[index]
-		if (isComponent(prev && prev, prev && prev.el)) {
-			setProps(item, prev.el)
-			render.push(() => prev.el.rerender())
-		}else {
+		if (prev?.component && isComponent(prev.component)) {
+			setProps(item, prev.component)
+			render.push(() => prev.component.rerender())
+		} else {
 			render.push(...patch(prev, item, newTree))
 		}
 	})
